@@ -1,7 +1,3 @@
-py
-import json
-import math
-import re
 import bpy
 
 def get_shapekey(object_name, shape_name):
@@ -12,11 +8,24 @@ def get_shapekey(object_name, shape_name):
         if shape_key.name == shape_name:
             return shape_key
 
+def reset_pose(root_object):
+    bpy.context.view_layer.objects.active = root_object
+    bpy.ops.object.posemode_toggle()
+    bpy.ops.pose.select_all(action='SELECT')
+    bpy.ops.pose.transforms_clear()
+    bpy.ops.object.posemode_toggle()
+
 root = bpy.context.active_object
 face_obj = bpy.data.objects["Face"]
 
-if "Avatar" not in root.name:
-    raise BaseException("Avatar object is not selected.")
+if "Avatar" not in root.name and "Player" not in root.name:
+    raise BaseException("Avatar/Player object is not selected.")
+
+if face_obj is None:
+    raise BaseException("Not found the Face object.")
+
+bpy.ops.object.mode_set(mode='OBJECT')
+reset_pose(root)
 
 # add basis shape
 if get_shapekey("Face", "Basis") == None:
@@ -43,8 +52,8 @@ for action in bpy.data.actions:
     shapekey.name = shapekey_name
 
     # reset transform
-    bpy.context.view_layer.objects.active = root
-    bpy.ops.object.posemode_toggle()
-    bpy.ops.pose.select_all(action='SELECT')
-    bpy.ops.pose.transforms_clear()
-    bpy.ops.object.posemode_toggle()
+    reset_pose(root)
+
+# remove all actions
+# for action in bpy.data.actions:
+#     bpy.data.actions.remove(action)
